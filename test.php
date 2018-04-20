@@ -37,7 +37,12 @@ $edateid=dateidcreate($SearchFinishDay);
 
         <script>
         $(function() {
-            $( "#datepicker" ).datepicker();
+            $( "#datepicker" ).datepicker({
+                changeMonth: true,
+                changeYear: true,
+                minDate: new Date(2015, 1 - 1, 1), 
+                maxDate: "+2Y"
+            });
         });
 
         var sdateid='<?php echo $sdateid?>';
