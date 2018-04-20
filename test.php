@@ -28,6 +28,18 @@ $edateid=dateidcreate($SearchFinishDay);
         </style>
 
         <script>
+        
+        </script>
+    </head>
+
+    <body>
+        <p>日期：<input type="text" id="datepicker"></p>
+
+        <script>
+        $(function() {
+            $( "#datepicker" ).datepicker();
+        });
+
         var sdateid='<?php echo $sdateid?>';
         var edateid='<?php echo $edateid?>';
         var dutynum='24';
@@ -37,16 +49,6 @@ $edateid=dateidcreate($SearchFinishDay);
             allrotainfo=data;
             console.log(allrotainfo);
         });
-        
-        
-        
-        </script>
-    </head>
-
-    <body>
-
-        <script>
-
         </script>
     </body>
 </html>
