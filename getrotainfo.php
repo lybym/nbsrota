@@ -71,14 +71,12 @@ class rotaInfoGet {
 
 }
 
-//返回未退休人数
+//返回nameinfo的条目数
 function nameNumGet($sdateid){
     global $db;
     $i=0;
     foreach ($db->query('SELECT * FROM rota_bochuke_nameinfo') as $row) {
-        if($row['retirement']=="" or dateidcreate($row['retirement'])>=$sdateid){//如果退休日期大于dateid
-            $i++;
-        }
+        $i++;
     }
     return $i;
 }
@@ -134,6 +132,7 @@ for($nameid=1;$nameid<=$nameNum;$nameid++){
         $rotainfo[$nameid]=$info->RotaInfoArray();
     }
 }
+
 for($dateid=$sdateid;$dateid<=$edateid;$dateid++){
     $dayinfo[$dateid]=dayInfoNeed($dateid);
 }
