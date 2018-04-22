@@ -71,7 +71,6 @@ $(document).ready(function(){
             console.log(allrotainfo);
             var nameinfo=allrotainfo.nameinfo;
             
-
             $(".attend-tab").append('<tr class="attend-tab-date"><th class="tg-content">姓名日期</th></tr>');//日期行
             for(i=sdateid;i<=edateid;i++){
                 $(".attend-tab-date").append('<th class="tg-weekday">'+ allrotainfo.dayinfo[i].day +'</th>');
