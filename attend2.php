@@ -7,16 +7,8 @@ require('functionlib.php');
 
 
 <style type="text/css">
-table {
-    display: table;
-    border-collapse: separate;
-    border-spacing: 2px;
-    border-color: gray;
-}
 
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+
 .tg .tg-content1{font-family:"宋体", Times, sans-serif;}
 .tg .tg-content2{font-family:"仿宋", Times, sans-serif;}
 .tg .tg-signature{font-family:"黑体", Times, sans-serif;font-weight: bold;}

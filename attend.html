@@ -2,15 +2,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>统计</title>
+    <title>排班统计</title>
     <link rel="stylesheet" href="css/jquery-ui.min.css">
-    <link rel="stylesheet" href="css/user.css">
+    <link rel="stylesheet" href="css/user.css?v=1">
 
     <script src="libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="libs/jqueryui/datepicker-zh-CN.js"></script>
 
-    <script src="libs/funclibs.js"></script>
+    <script src="libs/funclibs.js?v=1"></script>
     <style>
             
     </style>
@@ -20,14 +20,7 @@ function echo(display){
     var x = document.getElementById("echo");
 	x.innerHTML=display;
 }
-var weekdayZH=new Array(7)
-weekdayZH[1]="一"
-weekdayZH[2]="二"
-weekdayZH[3]="三"
-weekdayZH[4]="四"
-weekdayZH[5]="五"
-weekdayZH[6]="六"
-weekdayZH[7]="日"
+
 </script>
 </head>
 
@@ -36,13 +29,13 @@ weekdayZH[7]="日"
 <p>请选择需要查询的日期：<input type="text" id="datepicker"></p>
 <button id="btn1">提交</button>
 
-<div class="attend">
-    <table class="tg" id="attend-tab">
+<div class="table" id="attend">
+    <table id="attend-tab">
+
     </table>
 </div>
-<div class="statistic">
-    <table class="tg" id="statistic-tab">
-    </table>
+<div class="table" id="statistic">
+    
 </div>
 
 
@@ -57,10 +50,9 @@ $(document).ready(function(){
 
     $("#btn1").click(function(){
         var dpget = $("#datepicker").val();
-        sdateid=dateidCreate(mStartDate(dpget));
-        edateid=dateidCreate(mEndDate(dpget));
-        //console.log(sdateid);
-        //console.log(edateid);
+        sdateid=dateidCreate(mStartDate(dpget));edateid=dateidCreate(mEndDate(dpget));
+        //sdateid=1159;edateid=1189;
+        //console.log(sdateid);console.log(edateid);
         
         var allrotainfo;
         $.getJSON('getrotainfo.php', {'sdateid': sdateid, 'edateid': edateid}, function(data) {
@@ -70,29 +62,31 @@ $(document).ready(function(){
             var dayinfo=allrotainfo.dayinfo;
             var nameinfo=allrotainfo.nameinfo;
             var dutyinfo=allrotainfo.dutyinfo;
-            $("#attend-tab").append('<tr id="attend-tab-date"><th class="tg-content1">姓名日期</th></tr>');//日期行
+            $("#attend-tab").append('<tr id="attend-tab-date"><td class="title">日期/时间</td></tr>');//日期行
             for(i=sdateid;i<=edateid;i++){
                 if(dayinfo[i].hoilday==1){
-                    $("#attend-tab-date").append('<th><div>'+ weekdayZH[dayinfo[i].week]+'</div><div class="tg-weekend">'+dayinfo[i].day +'</div></th>');
+                    daytype='weekend';
                 }
-                
                 else{
                     if((dayinfo[i].week=='7' || dayinfo[i].week=='6') && dayinfo[i].hoilday!='2'){
-                        $("#attend-tab-date").append('<th><div>'+ weekdayZH[dayinfo[i].week]+'</div><div class="tg-weekend">'+dayinfo[i].day +'</div></th>');
-                        //echo '<th class="tg-weekend">'.$xingqihanzi[$dayinfo['weeknumber']]."<br>".$dayinfo['day'].'</th>';
+                        daytype='weekend';
                     }
                     else{
-                        $("#attend-tab-date").append('<th><div>'+ weekdayZH[dayinfo[i].week]+'</div><div class="tg-weekday">'+dayinfo[i].day +'</div></th>');
-                        //echo '<th class="tg-weekday">'.$xingqihanzi[$dayinfo['weeknumber']]."<br>".$dayinfo['day'].'</th>';
+                        daytype='weekday';
                     }
                 }
-                
+                $("#attend-tab-date").append('<td><div>'
+                    + weekdayZH[dayinfo[i].week]
+                    +'</div><div class="date-'
+                    + daytype
+                    +'">'+dayinfo[i].day 
+                    +'</div></td>');
             }
 
             Object.keys(nameinfo).forEach(function(nameid){//根据人名数确定列数
                 var name_x=nameinfo[nameid].name_x;
-                $("#attend-tab").append('<tr id=name_'+name_x+'></tr>');
-                $('#name_'+name_x).append('<td class="tg-content1">'+ nameinfo[nameid].renming +'</td>');
+                $("#attend-tab").append('<tr id=attend-tab-name_'+name_x+'></tr>');
+                $('#attend-tab-name_'+name_x).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
                 for(j=sdateid;j<=edateid;j++){
                     var eachdateidinfo=allrotainfo.rotainfo[nameid][j];
                     var eachdateiddisplay='';
@@ -102,16 +96,12 @@ $(document).ready(function(){
                         rotaid='';
                         }
                         else{
-                            //rotaid=rotaidToDuty(rotaid,j,dutyinfo);
-                            for (val in dutyinfo){
-                                if(rotaid==dutyinfo[val].num){
-                                    rotaid=dutyinfo[val].name;
-                                }
-                            }
+                            rotaid=rotaidToDuty(rotaid,j,dutyinfo);
+                            //rotaid=rotaidToSimpleDuty(rotaid);
                         }
                     eachdateiddisplay+=rotaid+'<br>';//输出遍历的结果
                     }
-                    $('#name_'+name_x).append('<td class="tg-content1" id=name_' + name_x + '-' + j +'>' +eachdateiddisplay+ '</td>');
+                    $('#attend-tab-name_'+name_x).append('<td class="content" id=attend-tab-name_' + name_x + '-' + j +'>' +eachdateiddisplay+ '</td>');
                 }
             });
             

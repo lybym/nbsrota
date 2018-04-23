@@ -148,19 +148,17 @@ echo '</table>';
 }
 
 .tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
 .tg .tg-content1{font-family:"宋体", Times, sans-serif;}
 .tg .tg-content2{font-family:"仿宋", Times, sans-serif;}
 .tg .tg-signature{font-family:"黑体", Times, sans-serif;font-weight: bold;}
 .tg .tg-weekday{font-family:"Times New Roman", Times, sans-serif;}
 .tg .tg-weekend{font-family:"Times New Roman", Times, sans-serif;text-decoration: underline;font-weight: bold;}
 
-    .tg  {border-collapse:collapse;border-spacing:0;}
-    .tg td{font-family:Arial, sans-serif;font-size:14px;padding:0px 1px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-    .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:0px 1px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-    .tg .tg-s6z2{text-align:center}
-    .tg .tg-yw4l{text-align:left}
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:0px 1px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:0px 1px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg .tg-s6z2{text-align:center}
+.tg .tg-yw4l{text-align:left}
 
         </style>
 
