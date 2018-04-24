@@ -1,0 +1,50 @@
+#rota_record {
+    border: 1px solid black;
+    width: 800px;
+}
+
+.rota-record {
+    border: 1px solid black;
+    margin: 0;
+    padding: 0;
+    height: 200px;
+}
+
+.rota-record-date,.rota-record-week,.rota-record-duty,.rota-record-time,.rota-record-others {
+    list-style-type:none;
+    float: left;
+    border: 1px solid black;
+    height: 180px;
+}
+
+.rota-record-date {
+    width: 100px;
+}
+
+.rota-record-week,.rota-record-time,.rota-record-others {
+    width: 50px;
+}
+
+.rota-record-duty {
+    width: 500px;
+}
+
+.rota-record-duty-row {
+    border: 1px solid black;
+    margin: 0;
+    padding: 0;
+    height: 35px;
+    width: 450px;
+}
+
+.rota-record-duty-col {
+    text-align:center;
+    float: left;
+    border: 1px solid black;
+    height: 25px;
+    width: 100px;
+}
+
+input#autocomplete{
+    width: 90px;
+}
