@@ -34,6 +34,23 @@ function mEndDate(dateinfo){//根据月份信息获取月末的日期
     return mEnd;
 }
 
+function wStartDate(dateinfo){//根据月份信息获取周初日期
+    var wStart=new Date(dateinfo);
+    var weeknum=wStart.getDay();
+    if(weeknum==0){//周日为0
+        weeknum=7;
+    }
+    wStart.setDate(wStart.getDate()-weeknum+1);
+    return wStart;
+}
+
+function wEndDate(dateinfo){//根据月份信息获取周末的日期
+    var str=wStartDate(dateinfo);
+    var wEnd = new Date(str);
+    wEnd.setDate(wEnd.getDate() + 6);
+    return wEnd;
+}
+
 function rotaidToDuty(rotaid,dateid,dutyinfo){//通过rotaid和dateid查找对应的dutyinfo数组信息
     for (x in dutyinfo){
         if(rotaid==dutyinfo[x].num){
@@ -62,4 +79,22 @@ function rotaidToSimpleDuty(rotaid){
         simplerota='无';
     }
     return simplerota;
+}
+
+function nameidToReming(nameid,nameinfo){//通过nameid查找nameinfoJSON中的renming
+    var renming=nameinfo[nameid].renming;
+    return renming;
+}
+
+function isHoilday(dateid,dayinfo){//判断是否为假日
+    var isHoilday=0;
+    if(dayinfo[dateid].hoilday==1){
+        isHoilday=1;
+    }
+    else{
+        if((dayinfo[dateid].week=='7' || dayinfo[dateid].week=='6') && dayinfo[dateid].hoilday!='2'){
+            isHoilday=1;
+        }
+    }
+    return isHoilday;
 }

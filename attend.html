@@ -27,7 +27,6 @@ function echo(display){
 <body>
 <div id=echo></div>
 <p>请选择需要查询的日期：<input type="text" id="datepicker"></p>
-<button id="btn1">提交</button>
 
 <div class="table" id="attend">
     <table id="attend-tab">
@@ -48,7 +47,7 @@ $(document).ready(function(){
         maxDate: "+2Y" //多显示之后2年
     });
 
-    $("#btn1").click(function(){
+    $("#datepicker").change(function(){
         var dpget = $("#datepicker").val();
         sdateid=dateidCreate(mStartDate(dpget));edateid=dateidCreate(mEndDate(dpget));
         //sdateid=1159;edateid=1189;
@@ -64,16 +63,12 @@ $(document).ready(function(){
             var dutyinfo=allrotainfo.dutyinfo;
             $("#attend-tab").append('<tr id="attend-tab-date"><td class="title">日期/时间</td></tr>');//日期行
             for(i=sdateid;i<=edateid;i++){
-                if(dayinfo[i].hoilday==1){
+                var daytype;
+                if(isHoilday(i,dayinfo)){
                     daytype='weekend';
                 }
                 else{
-                    if((dayinfo[i].week=='7' || dayinfo[i].week=='6') && dayinfo[i].hoilday!='2'){
-                        daytype='weekend';
-                    }
-                    else{
-                        daytype='weekday';
-                    }
+                    daytype='weekday';
                 }
                 $("#attend-tab-date").append('<td><div>'
                     + weekdayZH[dayinfo[i].week]

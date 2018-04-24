@@ -20,6 +20,7 @@
 </head>
 
 <body>
+    <p>请选择需要查询的日期：<input type="text" id="datepicker"></p>
     <div id="rota_record_title">
 
     </div>
@@ -28,44 +29,87 @@
     </div>
 
 <script>
-for(weeknum=1;weeknum<=7;weeknum++){
-    $("#rota_record").append('<ul class="rota-record" id="rota_record_' + weeknum + '"></ul>');
-    $('#rota_record_' + weeknum).append('<li class="rota-record-date" id="date_' + weeknum + '">day</li>');
-    $('#rota_record_' + weeknum).append('<li class="rota-record-week" id="week_' + weeknum + '">week</li>');
-    $('#rota_record_' + weeknum).append('<li class="rota-record-time" id="time_' + weeknum + '">time</li>');
-    $('#rota_record_' + weeknum).append('<li class="rota-record-duty" id="duty_' + weeknum + '"></li>');
-    for(row=0;row<4;row++){
-        $('#duty_' + weeknum).append('<ul class="rota-record-duty-row" id="cont_' + weeknum + '_' + row + '"></ul>');
-        for(col=0;col<4;col++){
-            $('#cont_' + weeknum +'_' + row).append('<input class="rota-record-duty-col" id="cont_' + weeknum + '_' + row + '_' + col + '">');
+$("#datepicker").datepicker({
+    changeMonth: true,
+    changeYear: true,
+    minDate: new Date(2014,12-1,29), //起始从2015年1月1日开始
+    maxDate: "+2Y" //多显示之后2年
+});
+
+$("#datepicker").change(function(){
+    var dpget = $("#datepicker").val();
+    $("#rota_record").empty();
+    sdateid=dateidCreate(wStartDate(dpget));edateid=dateidCreate(wEndDate(dpget));
+    //console.log(sdateid);console.log(edateid);
+    //var sdateid=1178;var edateid=1184;
+    for(weeknum=sdateid;weeknum<=edateid;weeknum++){
+        $("#rota_record").append('<ul class="rota-record" id="rota_record_' + weeknum + '"></ul>');
+        $('#rota_record_' + weeknum).append('<li class="rota-record-date" id="date_' + weeknum + '"></li>');
+        $('#rota_record_' + weeknum).append('<li class="rota-record-week" id="week_' + weeknum + '"></li>');
+        $('#rota_record_' + weeknum).append('<li class="rota-record-time" id="time_' + weeknum + '">time</li>');
+        $('#rota_record_' + weeknum).append('<li class="rota-record-duty" id="duty_' + weeknum + '"></li>');
+        for(row=1;row<=4;row++){
+            $('#duty_' + weeknum).append('<ul class="rota-record-duty-row" id="cont_' + weeknum + '_' + row + '"></ul>');
+            for(col=1;col<=5;col++){
+                if (col==2){//历史遗留原因需要跳过2
+                    continue;
+                }
+                $('#cont_' + weeknum +'_' + row).append('<input class="rota-record-duty-col" id="cont_' + weeknum + '_' + row + col + '">');
+            }
         }
+        $('#rota_record_' + weeknum).append('<li class="rota-record-others" id="other_' + weeknum + '">others</li>');
     }
-    $('#rota_record_' + weeknum).append('<li class="rota-record-others" id="other_' + weeknum + '">others</li>');
-}
 
-var sdateid=1184;var edateid=1190;
-var allrotainfo;
-var dayinfo;
-var nameinfo;
-var dutyinfo;
-$.getJSON('getrotainfo.php', {'sdateid': sdateid, 'edateid': edateid}, function(data) {
-    allrotainfo=data;
-    dayinfo=allrotainfo.dayinfo;
-    nameinfo=allrotainfo.nameinfo;
-    dutyinfo=allrotainfo.dutyinfo;
-    //console.log(nameinfo);
+    var allrotainfo;
+    var dayinfo;
+    var nameinfo;
+    var dutyinfo;
+    var rotainfo;
+    $.getJSON('getrotainfo.php', {'sdateid': sdateid, 'edateid': edateid}, function(data) {
+        allrotainfo=data;
+        dayinfo=allrotainfo.dayinfo;
+        nameinfo=allrotainfo.nameinfo;
+        dutyinfo=allrotainfo.dutyinfo;
+        rotainfo=allrotainfo.rotainfo;
+        //console.log(dayinfo);
+        for(dateid=sdateid;dateid<=edateid;dateid++){
+            var week=dayinfo[dateid].week;
+            $('#date_' + dateid).append(dayinfo[dateid].month+'月'+dayinfo[dateid].day+'日');
+            $('#week_' + dateid).append('星期'+weekdayZH[week]);
+            if(isHoilday(dateid,dayinfo)){
+                $('#date_' + dateid).addClass("hoilday");
+                $('#week_' + dateid).addClass("hoilday");
+            }
+            Object.keys(nameinfo).forEach(function(nameid){//
+                var rotadisnum=rotainfo[nameid][dateid];
+                Object.keys(rotadisnum).forEach(function(rotacontnum){
+                    if(rotadisnum[rotacontnum]!='0'){
+                        $('#cont_' + dateid + '_' + rotadisnum[rotacontnum]).val(nameidToReming(nameid,nameinfo));
+                    }
+                });
+                
+            });
+        }
     
-    var name_source=[];
-    Object.keys(nameinfo).forEach(function(nameid){//
-        var name=nameinfo[nameid].renming;
-        name_source.push(name);
-    });
-    console.log(name_source);
+        var name_source=[];//["人名",...]数组
+        //var name_renming=[];//[name_x:"人名",...]数组
+        Object.keys(nameinfo).forEach(function(nameid){//
+            var name=nameinfo[nameid].renming;
+            //var name_x=nameinfo[nameid].name_x;
+            //name_renming[name_x]=name;
+            name_source.push(name);
+        });
+        //console.log(name_renming);
+        //console.log(name_source);
 
-    $(".rota-record-duty-col").autocomplete({
-        source: name_source
+        $(".rota-record-duty-col").autocomplete({
+            minLength: 0,
+            source: name_source
+        });
     });
 });
+
+
 
 </script>
 </body>
