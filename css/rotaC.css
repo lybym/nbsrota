@@ -18,10 +18,10 @@
     border: 1px solid black;
     height: 116px;
     font-family: "楷体",Times, sans-serif;
-    font-size:x-large;
+    font-size: x-large;
 }
 
-.rota-record-date,.rota-record-duty,.rota-record-time,.rota-record-others {
+.rota-record-date,.rota-record-duty,.rota-record-others {
     line-height: 120px;
 }
 
@@ -34,9 +34,21 @@
 }
 
 .rota-record-week {
-    writing-mode: tb-rl;/*星期文字竖排*/
+    /*星期文字竖排*/
+    writing-mode: tb-rl;
     width: 40px;
     line-height: 40px;
+}
+
+.rota-record-time-cont {
+    float: left;
+    list-style-type: none;
+    border: 1px solid black;
+    margin: 0;
+    padding: 0;
+    height: 27px;
+    width: 70px;
+    font-family: "楷体",Times, sans-serif;
 }
 
 .rota-record-duty {
@@ -61,6 +73,6 @@
     font-size: x-large
 }
 
-.hoilday{
-    background-color:grey;
+.hoilday {
+    background-color: grey;
 }

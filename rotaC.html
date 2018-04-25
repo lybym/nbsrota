@@ -27,6 +27,7 @@
     <div id="rota_record">
         
     </div>
+    <button id="btn1">提交修改</button>
 
 <script>
 $("#datepicker").datepicker({
@@ -46,7 +47,11 @@ $("#datepicker").change(function(){
         $("#rota_record").append('<ul class="rota-record" id="rota_record_' + weeknum + '"></ul>');
         $('#rota_record_' + weeknum).append('<li class="rota-record-date" id="date_' + weeknum + '"></li>');
         $('#rota_record_' + weeknum).append('<li class="rota-record-week" id="week_' + weeknum + '"></li>');
-        $('#rota_record_' + weeknum).append('<li class="rota-record-time" id="time_' + weeknum + '">time</li>');
+        $('#rota_record_' + weeknum).append('<li class="rota-record-time" id="time_' + weeknum + '"></li>');
+        $('#time_' + weeknum).append('<div class="rota-record-time-cont" id="time_cont_' + weeknum + '">夜班</div>');
+        $('#time_' + weeknum).append('<div class="rota-record-time-cont" id="time_cont_' + weeknum + '">早班</div>');
+        $('#time_' + weeknum).append('<div class="rota-record-time-cont" id="time_cont_' + weeknum + '">中班</div>');
+        $('#time_' + weeknum).append('<div class="rota-record-time-cont" id="time_cont_' + weeknum + '">晚班</div>');
         $('#rota_record_' + weeknum).append('<li class="rota-record-duty" id="duty_' + weeknum + '"></li>');
         for(row=1;row<=4;row++){
             $('#duty_' + weeknum).append('<ul class="rota-record-duty-row" id="cont_' + weeknum + '_' + row + '"></ul>');
@@ -71,7 +76,7 @@ $("#datepicker").change(function(){
         nameinfo=allrotainfo.nameinfo;
         dutyinfo=allrotainfo.dutyinfo;
         rotainfo=allrotainfo.rotainfo;
-        //console.log(dayinfo);
+        console.log(allrotainfo);
         for(dateid=sdateid;dateid<=edateid;dateid++){
             var week=dayinfo[dateid].week;
             $('#date_' + dateid).append(dayinfo[dateid].month+'月'+dayinfo[dateid].day+'日');
@@ -93,18 +98,42 @@ $("#datepicker").change(function(){
     
         var name_source=[];//["人名",...]数组
         //var name_renming=[];//[name_x:"人名",...]数组
+        var renming_namex=[];//["人名":name_x,...]数组,用来供构建update json查询
         Object.keys(nameinfo).forEach(function(nameid){//
             var name=nameinfo[nameid].renming;
             //var name_x=nameinfo[nameid].name_x;
             //name_renming[name_x]=name;
+            renming_namex[name]=nameinfo[nameid].name_x;
             name_source.push(name);
         });
-        //console.log(name_renming);
+        //console.log(renming_namex);
         //console.log(name_source);
 
         $(".rota-record-duty-col").autocomplete({
             minLength: 0,
             source: name_source
+        });
+        
+        $("#btn1").click(function(){
+            var updateinfo={};
+            updateinfo.rotainfo={};
+            updateinfo.otherinfo={};
+            for(update_nameX=2;update_nameX<=25;update_nameX++){//没解决依次读入nameid作为循环
+                updateinfo.rotainfo[update_nameX]={};
+                for(update_dateid=sdateid;update_dateid<=edateid;update_dateid++){
+                    updateinfo.rotainfo[update_nameX][update_dateid]=[];
+                }
+            }
+            $(".rota-record-duty-col").each(function(){
+                var updatedateid=$(this).attr("id").substr(5,4);
+                var updateduty=$(this).attr("id").substr(10,2);
+                var updatename=$(this).val();
+                var updatename_x=renming_namex[updatename];
+                if(updatename!=''){
+                    updateinfo.rotainfo[updatename_x][updatedateid][0]=updateduty;//没解决多个数据push进入
+                }
+            });
+            console.log(updateinfo);
         });
     });
 });
