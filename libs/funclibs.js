@@ -5,7 +5,7 @@ weekdayZH[3]="三"
 weekdayZH[4]="四"
 weekdayZH[5]="五"
 weekdayZH[6]="六"
-weekdayZH[7]="日"
+weekdayZH[0]="日"
 
 function dateidCreate(dateinfo){//将XXXX-XX-XX格式日期转化为自2014/12/29以来的天数dateid
     // Set the unit values in milliseconds.
@@ -19,6 +19,26 @@ function dateidCreate(dateinfo){//将XXXX-XX-XX格式日期转化为自2014/12/2
     var dateid=(dateidMsec-dateidZeroMsec)/msecPerDay+1;//因为2014/12/29的dateid就是1
     return dateid;
 }  
+function timeStampToTimeNum(timestamp){//把timeStamp转换为TimeNum
+    var timeNum=timestamp/100000;
+    //var timeNum=timestamp.substr(0,8);
+    return timeNum;
+}
+
+function timeNumToTimeStamp(timenum){//把timeNum转换为TimeStamp
+    var timestamp=timeNum*100000;
+    return timestamp;
+}
+
+function timeNumArrayCreate(sdtimeNum,edtimeNum){//创建timeNum的循环数组，用来遍历
+    var timeNumArray=[];
+    while (sdtimeNum<=edtimeNum)
+    {
+        timeNumArray.push(sdtimeNum);
+        sdtimeNum+=864;
+    }
+    return timeNumArray;
+}
 
 function mStartDate(dateinfo){//根据月份信息获取月初日期
     var str=dateinfo.substr(0,7);
@@ -34,7 +54,7 @@ function mEndDate(dateinfo){//根据月份信息获取月末的日期
     return mEnd;
 }
 
-function wStartDate(dateinfo){//根据月份信息获取周初日期
+function wStartDate(dateinfo){//返回输入
     var wStart=new Date(dateinfo);
     var weeknum=wStart.getDay();
     if(weeknum==0){//周日为0
@@ -86,13 +106,14 @@ function nameidToReming(nameid,nameinfo){//通过nameid查找nameinfoJSON中的r
     return renming;
 }
 
-function isHoilday(dateid,dayinfo){//判断是否为假日
+function isHoilday(timeNum,dayinfo){//判断是否为假日
     var isHoilday=0;
-    if(dayinfo[dateid].hoilday==1){
+    time=new Date(timeNum*100000);
+    if(dayinfo[timeNum]=='1'){
         isHoilday=1;
     }
     else{
-        if((dayinfo[dateid].week=='7' || dayinfo[dateid].week=='6') && dayinfo[dateid].hoilday!='2'){
+        if((time.getDay()==0 || time.getDay()==6) && dayinfo[timeNum]!='2'){
             isHoilday=1;
         }
     }

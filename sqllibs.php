@@ -54,5 +54,59 @@ function existInSQL($tablename,$row,$i){//判断此条数据数据库内是否�
     }
 }
 
+function timeNumCreate($datainfo){//将XXXX-XX-XX格式日期转化为timeNum
+    date_default_timezone_set('Asia/Shanghai');
+    $time = strtotime($datainfo);
+    $timeNum=$time/100;
+    return $timeNum;
+}
 
+function timeNumArrayCreate($sdtimeNum,$edtimeNum){//创建timeNum的循环数组，用来遍历
+    $timeNumArray=array();
+    while ($sdtimeNum<=$edtimeNum)
+    {
+        array_push($timeNumArray,$sdtimeNum);
+        $sdtimeNum+=864;
+    }
+    return $timeNumArray;
+}
+
+function StillWork($nameid,$timeNum){//判断对于当前timenum是否退休，未退休返回1，已退休返回0
+    $row=ReadFromSql("rota_bochuke_nameinfo","","id",$nameid);
+    if($row['retirement']==""){
+        return 1;
+    }
+    elseif(timeNumCreate($row['retirement'])>=$timeNum){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+function nameinfoGet($sdtimeNum){//返回nameinfo数组
+    global $db;
+    $nameinfo=array();
+    foreach ($db->query('SELECT * FROM rota_bochuke_nameinfo') as $row) {
+        if(StillWork($row['id'],$sdtimeNum)){
+            $nameid=$row['id'];
+            $nameinfo[$nameid]["renming"]=$row['renming'];
+            $nameinfo[$nameid]["rota"]=$row['rota'];
+            $nameinfo[$nameid]["time"]=$row['time'];
+        }
+    }
+    return $nameinfo;
+}
+
+function dayInfoNeed($sdtimeNum,$edtimeNum){//返回放假信息数组
+    $arr=array();
+    $timeNumLoop=timeNumArrayCreate($sdtimeNum,$edtimeNum);
+    for($i=0;$i<count($timeNumLoop);$i++){
+        $row=ReadFromSql("rota_dayinfo","","timenum",$timeNumLoop[$i]);
+        if($row){
+            $arr[$timeNumLoop[$i]]=$row['hoilday'];
+        }
+    }
+    return $arr;
+}
 ?>

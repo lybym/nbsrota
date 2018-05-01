@@ -20,16 +20,13 @@
 </head>
 
 <body>
-    <p>请选择需要查询的日期：<input type="text" id="datepicker"></p>
-    <div id="rota_record_title">
-
-    </div>
+    <p>请选择需要修改的日期：<input type="text" id="datepicker"></p>
     <div id="rota_record">
         
     </div>
     <button id="btn1">提交修改</button>
 
-<script>
+<script> 
 $("#datepicker").datepicker({
     changeMonth: true,
     changeYear: true,
@@ -37,13 +34,36 @@ $("#datepicker").datepicker({
     maxDate: "+2Y" //多显示之后2年
 });
 
+var dpget;
+//var sdateid;var edateid;
+var sdtimeNum;//将时间戳转换为timeNum作为时间标识,每个之间相差864
+var edtimeNum;
+var timeNumLoop=[];//timeNum的循环数组，用来遍历
+var getinfo;
+var dayinfo;
+var nameinfo;
+var dutyinfo;
+var rotainfo;
+var updateinfo={};
+var name_source=[];//["人名",...]数组
+var renming_nameid=[];//["人名":nameid,...]数组,用来供构建update json查询
+var dutyx_num=[];//["duty_X":num,...]数组,用来供班次查询
+
+
 $("#datepicker").change(function(){
-    var dpget = $("#datepicker").val();
+    dpget = $("#datepicker").val();
     $("#rota_record").empty();
-    sdateid=dateidCreate(wStartDate(dpget));edateid=dateidCreate(wEndDate(dpget));
-    //console.log(sdateid);console.log(edateid);
-    //var sdateid=1178;var edateid=1184;
-    for(weeknum=sdateid;weeknum<=edateid;weeknum++){
+    sdtime = new Date(wStartDate(dpget));
+    edtime = new Date(wEndDate(dpget));
+    UTCsdtimestamp=sdtime.getTime();//此处获得的时间戳为UTC时间，比北京时间多8H，即28800秒，28800000毫秒
+    UTCedtimestamp=edtime.getTime();
+    sdtimeNum = (UTCsdtimestamp-28800000)/100000;//获得开始和结束时间的时间戳,转换为timeNum作为时间标识,每个之间相差864
+    edtimeNum = (UTCedtimestamp-28800000)/100000;
+    //console.log(sdtimeNum);console.log(edtimeNum);
+    timeNumLoop=timeNumArrayCreate(sdtimeNum,edtimeNum);
+    //console.log(timeNumLoop);
+    //$("#rota_record").append('<ul class="rota-title"><li id="rota_title"></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>');
+    for(weeknum=0;weeknum<timeNumLoop.length;weeknum++){
         $("#rota_record").append('<ul class="rota-record" id="rota_record_' + weeknum + '"></ul>');
         $('#rota_record_' + weeknum).append('<li class="rota-record-date" id="date_' + weeknum + '"></li>');
         $('#rota_record_' + weeknum).append('<li class="rota-record-week" id="week_' + weeknum + '"></li>');
@@ -64,81 +84,88 @@ $("#datepicker").change(function(){
         }
         $('#rota_record_' + weeknum).append('<li class="rota-record-others" id="other_' + weeknum + '">others</li>');
     }
-
-    var allrotainfo;
-    var dayinfo;
-    var nameinfo;
-    var dutyinfo;
-    var rotainfo;
-    $.getJSON('getrotainfo.php', {'sdateid': sdateid, 'edateid': edateid}, function(data) {
-        allrotainfo=data;
-        dayinfo=allrotainfo.dayinfo;
-        nameinfo=allrotainfo.nameinfo;
-        dutyinfo=allrotainfo.dutyinfo;
-        rotainfo=allrotainfo.rotainfo;
-        console.log(allrotainfo);
-        for(dateid=sdateid;dateid<=edateid;dateid++){
-            var week=dayinfo[dateid].week;
-            $('#date_' + dateid).append(dayinfo[dateid].month+'月'+dayinfo[dateid].day+'日');
-            $('#week_' + dateid).append('星期'+weekdayZH[week]);
-            if(isHoilday(dateid,dayinfo)){
-                $('#date_' + dateid).addClass("hoilday");
-                $('#week_' + dateid).addClass("hoilday");
+    
+    $.getJSON('getrotainfo.php', {'sdtimeNum': sdtimeNum, 'edtimeNum': edtimeNum}, function(data) {
+        getinfo=data;
+        dayinfo=getinfo.dayinfo;
+        nameinfo=getinfo.nameinfo;
+        dutyinfo=getinfo.dutyinfo;
+        rotainfo=getinfo.rotainfo;
+        console.log(getinfo);
+        Object.keys(dutyinfo).forEach(function(dutyinfo_index){
+            if(dutyinfo[dutyinfo_index]['num']!=''){
+                dutyx_num[dutyinfo[dutyinfo_index]['dutyx']]=dutyinfo[dutyinfo_index]['num'];
             }
-            Object.keys(nameinfo).forEach(function(nameid){//
-                var rotadisnum=rotainfo[nameid][dateid];
-                Object.keys(rotadisnum).forEach(function(rotacontnum){
-                    if(rotadisnum[rotacontnum]!='0'){
-                        $('#cont_' + dateid + '_' + rotadisnum[rotacontnum]).val(nameidToReming(nameid,nameinfo));
-                    }
-                });
-                
+        });
+        //console.log(dutyx_num);
+        for(weeknum=0;weeknum<timeNumLoop.length;weeknum++){
+            timeNum=timeNumLoop[weeknum];
+            time=new Date(timeNum*100000);
+            $('#date_' + weeknum).append(time.getMonth()+1+'月'+time.getDate()+'日');
+            $('#week_' + weeknum).append('星期'+weekdayZH[time.getDay()]);
+            if(isHoilday(timeNum,dayinfo)){
+                //$('#date_' + dateid).addClass("hoilday");
+                $('#week_' + weeknum).addClass("hoilday");
+            }
+            Object.keys(rotainfo[timeNum]).forEach(function(duty_x){
+                nameid=rotainfo[timeNum][duty_x];
+                $('#cont_' + weeknum + '_' + dutyx_num[duty_x]).val(nameidToReming(nameid,nameinfo));
             });
         }
-    
-        var name_source=[];//["人名",...]数组
-        //var name_renming=[];//[name_x:"人名",...]数组
-        var renming_namex=[];//["人名":name_x,...]数组,用来供构建update json查询
+
+        //var namex_renming=[];//[name_x:"人名",...]数组
+        
+        name_source=[];
         Object.keys(nameinfo).forEach(function(nameid){//
             var name=nameinfo[nameid].renming;
             //var name_x=nameinfo[nameid].name_x;
             //name_renming[name_x]=name;
-            renming_namex[name]=nameinfo[nameid].name_x;
+            renming_nameid[name]=nameid;
             name_source.push(name);
         });
-        //console.log(renming_namex);
+
+        updateinfo.rotainfo={};
+        updateinfo.otherinfo={};
+        for(update_weeknum=0;update_weeknum<timeNumLoop.length;update_weeknum++){//构建用来更新排班表发送的JSON
+            updateinfo.rotainfo[timeNumLoop[update_weeknum]]={};
+            for(update_dutynum=0;update_dutynum<dutyinfo.length;update_dutynum++){
+                dutyNum=dutyinfo[update_dutynum].num;
+                if (dutyNum!='') {
+                    updateinfo.rotainfo[timeNumLoop[update_weeknum]][dutyNum]=[];
+                }
+            }
+        }
+        //console.log(renming_nameid);
         //console.log(name_source);
+        //console.log(updateinfo);
+        //console.log(name_source);
+    
 
         $(".rota-record-duty-col").autocomplete({
             minLength: 0,
             source: name_source
-        });
-        
-        $("#btn1").click(function(){
-            var updateinfo={};
-            updateinfo.rotainfo={};
-            updateinfo.otherinfo={};
-            for(update_nameX=2;update_nameX<=25;update_nameX++){//没解决依次读入nameid作为循环
-                updateinfo.rotainfo[update_nameX]={};
-                for(update_dateid=sdateid;update_dateid<=edateid;update_dateid++){
-                    updateinfo.rotainfo[update_nameX][update_dateid]=[];
-                }
-            }
-            $(".rota-record-duty-col").each(function(){
-                var updatedateid=$(this).attr("id").substr(5,4);
-                var updateduty=$(this).attr("id").substr(10,2);
-                var updatename=$(this).val();
-                var updatename_x=renming_namex[updatename];
-                if(updatename!=''){
-                    updateinfo.rotainfo[updatename_x][updatedateid][0]=updateduty;//没解决多个数据push进入
-                }
-            });
-            console.log(updateinfo);
+        }).focus(function () {
+            $(this).autocomplete("search");
         });
     });
 });
 
-
+$("#btn1").click(function(){
+    $(".rota-record-duty-col").each(function(){
+        var updatedateid=$(this).attr("id").substr(5,1);
+        var updateduty=$(this).attr("id").substr(7,2);
+        var updatename=$(this).val();
+        if(updatename!=''){
+            var updatenameid=renming_nameid[updatename];
+            updateinfo.rotainfo[timeNumLoop[updatedateid]][updateduty].push(updatenameid);
+        }
+    });
+    console.log(JSON.stringify(updateinfo.rotainfo));
+    $.post("updaterota.php",{updata:JSON.stringify(updateinfo.rotainfo)},
+        function(data,status){
+        //alert("\n状态: " + status);
+    });
+});
 
 </script>
 </body>

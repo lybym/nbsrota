@@ -11,7 +11,13 @@
     padding: 0;
     height: 118px;
 }
-
+.rota-title{
+    list-style-type: none;
+    float: left;
+    border: 1px solid black;
+    font-family: "楷体",Times, sans-serif;
+    font-size: x-large;
+}
 .rota-record-date,.rota-record-week,.rota-record-duty,.rota-record-time,.rota-record-others {
     list-style-type: none;
     float: left;
