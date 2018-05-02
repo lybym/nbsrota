@@ -47,62 +47,76 @@ $(document).ready(function(){
         maxDate: "+2Y" //多显示之后2年
     });
 
+    var dpget;
+    var sdtimeNum;//将时间戳转换为timeNum作为时间标识,每个之间相差864
+    var edtimeNum;
+    var timeNumLoop=[];//timeNum的循环数组，用来遍历
+    var getinfo;
+    var dayinfo;
+    var nameinfo;
+    var dutyinfo;
+    var rotainfo;
+    var updateinfo={};
+    var name_source=[];//["人名",...]数组
+    var renming_nameid=[];//["人名":nameid,...]数组,用来供构建update json查询
+    var dutyx_num=[];//["duty_X":num,...]数组,用来供班次查询
+
     $("#datepicker").change(function(){
         var dpget = $("#datepicker").val();
-        sdateid=dateidCreate(mStartDate(dpget));edateid=dateidCreate(mEndDate(dpget));
-        //sdateid=1159;edateid=1189;
-        //console.log(sdateid);console.log(edateid);
-        
-        var allrotainfo;
-        $.getJSON('getrotainfo.php', {'sdateid': sdateid, 'edateid': edateid}, function(data) {
+        sdtime = new Date(mStartDate(dpget));
+        edtime = new Date(mEndDate(dpget));
+        UTCsdtimestamp=sdtime.getTime();//此处获得的时间戳为UTC时间，比北京时间多8H，即28800秒，28800000毫秒
+        UTCedtimestamp=edtime.getTime();
+        sdtimeNum = (UTCsdtimestamp-28800000)/100000;//获得开始和结束时间的时间戳,转换为timeNum作为时间标识,每个之间相差864
+        edtimeNum = (UTCedtimestamp-28800000)/100000;
+        //console.log(sdtimeNum);console.log(edtimeNum);
+        timeNumLoop=timeNumArrayCreate(sdtimeNum,edtimeNum);
+
+        $.getJSON('getrotainfo.php', {'sdtimeNum': sdtimeNum, 'edtimeNum': edtimeNum}, function(data) {
             $("#attend-tab").empty();
-            var allrotainfo=data;
-            console.log(allrotainfo);
-            var dayinfo=allrotainfo.dayinfo;
-            var nameinfo=allrotainfo.nameinfo;
-            var dutyinfo=allrotainfo.dutyinfo;
+            getinfo=data;
+            console.log(getinfo);
+            dayinfo=getinfo.dayinfo;
+            nameinfo=getinfo.nameinfo;
+            dutyinfo=getinfo.dutyinfo;
+            rotainfo=getinfo.rotainfo;
             $("#attend-tab").append('<tr id="attend-tab-date"><td class="title">日期/时间</td></tr>');//日期行
-            for(i=sdateid;i<=edateid;i++){
+            for(monthnum=0;monthnum<timeNumLoop.length;monthnum++){
+                timeNum=timeNumLoop[monthnum];
+                time=new Date(timeNum*100000);
                 var daytype;
-                if(isHoilday(i,dayinfo)){
+                if(isHoilday(timeNum,dayinfo)){
                     daytype='weekend';
                 }
                 else{
                     daytype='weekday';
                 }
                 $("#attend-tab-date").append('<td><div>'
-                    + weekdayZH[dayinfo[i].week]
+                    + weekdayZH[time.getDay()]
                     +'</div><div class="date-'
                     + daytype
-                    +'">'+dayinfo[i].day 
+                    +'">'+time.getDate() 
                     +'</div></td>');
             }
 
             Object.keys(nameinfo).forEach(function(nameid){//根据人名数确定列数
-                var name_x=nameinfo[nameid].name_x;
-                $("#attend-tab").append('<tr id=attend-tab-name_'+name_x+'></tr>');
-                $('#attend-tab-name_'+name_x).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
-                for(j=sdateid;j<=edateid;j++){
-                    var eachdateidinfo=allrotainfo.rotainfo[nameid][j];
-                    var eachdateiddisplay='';
-                    for (x in eachdateidinfo){//遍历每个内容数组
-                        var rotaid=eachdateidinfo[x];
-                        if(rotaid=='0'){
-                        rotaid='';
+                $("#attend-tab").append('<tr id=attend-tab-name_'+nameid+'></tr>');
+                $('#attend-tab-name_'+nameid).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
+                for(monthnum=0;monthnum<timeNumLoop.length;monthnum++){
+                    timeNum=timeNumLoop[monthnum];
+                    var eachtimenuminfo=[];
+                    eachtimenuminfo=rotainfo[timeNum];
+                    var cont='';
+                    for (x in eachtimenuminfo){//遍历每个内容数组
+                        var rotaid=eachtimenuminfo[x];
+                        if(rotaid==nameid){
+                            cont+=dutyxToDuty(x,timeNum,dutyinfo)+'<br>';
+                            //cont+=dutyxToSimpleDuty(x,timeNum,dutyinfo)+'<br>';
                         }
-                        else{
-                            rotaid=rotaidToDuty(rotaid,j,dutyinfo);
-                            //rotaid=rotaidToSimpleDuty(rotaid);
-                        }
-                    eachdateiddisplay+=rotaid+'<br>';//输出遍历的结果
                     }
-                    $('#attend-tab-name_'+name_x).append('<td class="content" id=attend-tab-name_' + name_x + '-' + j +'>' +eachdateiddisplay+ '</td>');
+                    $('#attend-tab-name_'+nameid).append('<td class="content" id=attend-tab-name_' + nameid + '-' + timeNum +'>' + cont + '</td>');
                 }
             });
-            
-            //for(i=sdateid;i<=edateid;i++){
-            //    $(".attend-tab-date").append('<th class="tg-weekday">'+allrotainfo.dayinfo[i].day+"</th>");
-            //}
         });
         
         

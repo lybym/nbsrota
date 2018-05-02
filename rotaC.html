@@ -108,7 +108,7 @@ $("#datepicker").change(function(){
                 $('#week_' + weeknum).addClass("hoilday");
             }
             Object.keys(rotainfo[timeNum]).forEach(function(duty_x){
-                nameid=rotainfo[timeNum][duty_x];
+                var nameid=rotainfo[timeNum][duty_x];
                 $('#cont_' + weeknum + '_' + dutyx_num[duty_x]).val(nameidToReming(nameid,nameinfo));
             });
         }

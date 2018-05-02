@@ -71,15 +71,22 @@ function wEndDate(dateinfo){//根据月份信息获取周末的日期
     return wEnd;
 }
 
-function rotaidToDuty(rotaid,dateid,dutyinfo){//通过rotaid和dateid查找对应的dutyinfo数组信息
-    for (x in dutyinfo){
-        if(rotaid==dutyinfo[x].num){
-            return dutyinfo[x].name;
+function dutyxToDuty(dutyx,timeNum,dutyinfo){//通过dutyx和timeNum查找对应的dutyinfo数组信息
+    for (index in dutyinfo){
+        if(timeNum>=dutyinfo[index].stimenum && timeNum<=dutyinfo[index].etimenum){
+            if(dutyx==dutyinfo[index].dutyx){
+                    return dutyinfo[index].name;
+            }
         }
     }
 }
 
-function rotaidToSimpleDuty(rotaid){
+function dutyxToSimpleDuty(dutyx,dateid,dutyinfo){
+    for (x in dutyinfo){
+        if(dutyx==dutyinfo[x].dutyx){
+            rotaid=dutyinfo[x].num;
+        }
+    }
     var str=rotaid.substr(0,1);
     var simplerota='';
     switch(str){
