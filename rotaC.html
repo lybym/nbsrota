@@ -163,7 +163,7 @@ $("#btn1").click(function(){
     console.log(JSON.stringify(updateinfo.rotainfo));
     $.post("updaterota.php",{updata:JSON.stringify(updateinfo.rotainfo)},
         function(data,status){
-        //alert("\n状态: " + status);
+        alert("\n录入: " + status);
     });
 });
 
