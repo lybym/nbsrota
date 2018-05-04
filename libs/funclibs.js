@@ -89,6 +89,9 @@ function nameidToReming(nameid,nameinfo){//通过nameid查找nameinfoJSON中的r
 function isHoilday(timeNum,dayinfo){//判断是否为假日
     var isHoilday=0;
     time=new Date(timeNum*100000);
+    if(dayinfo[timeNum]=='3'){//三倍工资日
+        isHoilday=3;
+    }
     if(dayinfo[timeNum]=='1'){//国务院法定假日
         isHoilday=1;
     }
@@ -153,11 +156,11 @@ function dutyStat(nameid,dayinfo,dutyinfo,timeNumLoop,rotainfo){//统计数组�
     }
     for(i=0;i<timeNumLoop.length;i++){
         timenum=timeNumLoop[i];
-        if(isHoilday(timenum,dayinfo)==1){
+        if(isHoilday(timenum,dayinfo)==3){
             stat.JR+=dura[i];
         }
     }
-    //console.log(dura);
+    console.log(dura);
     stat.time=math.round(stat.time,1);
     stat.sum=stat.ye+stat.zao+stat.zhong+stat.wan;
     Object.keys(stat).forEach(function(i){

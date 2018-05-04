@@ -8,7 +8,7 @@
 <script src="libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 <script src="libs/jqueryui/datepicker-zh-CN.js"></script>
-<script src="libs/funclibs.js?v=1"></script>
+<script src="libs/funclibs.js?v=1.1"></script>
 <style>
 
 
@@ -103,11 +103,10 @@ $("#datepicker").change(function(){
             time=new Date(timeNum*100000);
             $('#date_' + weeknum).append(time.getMonth()+1+'月'+time.getDate()+'日');
             $('#week_' + weeknum).append('星期'+weekdayZH[time.getDay()]);
-            if(isHoilday(timeNum,dayinfo)==1){
+            if(isHoilday(timeNum,dayinfo)==3){
                 $('#date_' + weeknum).addClass("hoilday");
-                $('#week_' + weeknum).addClass("hoilday");
             }
-            if(isHoilday(timeNum,dayinfo)==2){
+            if(isHoilday(timeNum,dayinfo)){
                 $('#week_' + weeknum).addClass("hoilday");
             }
             Object.keys(rotainfo[timeNum]).forEach(function(duty_x){

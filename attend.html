@@ -10,7 +10,7 @@
     <script src="libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="libs/jqueryui/datepicker-zh-CN.js"></script>
 
-    <script src="libs/funclibs.js?v=1"></script>
+    <script src="libs/funclibs.js?v=1.1"></script>
     <style>
             
     </style>
@@ -101,7 +101,7 @@ $(document).ready(function(){
                 else{
                     $('#attend_date_' + monthnum).addClass("date-weekday");
                 }
-                if(isHoilday(timeNum,dayinfo)==1){
+                if(isHoilday(timeNum,dayinfo)==3){
                     $('#attend_date_' + monthnum).addClass("hoilday");
                 }
                 
@@ -110,7 +110,7 @@ $(document).ready(function(){
             Object.keys(nameinfo).forEach(function(nameid){//根据人名数确定列数
                 $("#attend-tab").append('<tr id=attend-tab-name_'+nameid+'></tr>');
                 $('#attend-tab-name_'+nameid).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
-                $('#trihoilday').append(nameinfo[nameid].renming+'<br>');
+                
                 for(monthnum=0;monthnum<timeNumLoop.length;monthnum++){
                     timeNum=timeNumLoop[monthnum];
                     var eachtimenuminfo=[];
@@ -123,7 +123,8 @@ $(document).ready(function(){
                             //cont+=dutyxToSimpleDuty(x,timeNum,dutyinfo)+'<br>';
 
                             tri=dutyxToDuty(x,timeNum,dutyinfo);
-                            if(tri!='' && isHoilday(timeNum,dayinfo)==1){
+                            if(tri!='' && isHoilday(timeNum,dayinfo)==3){
+                                $('#trihoilday').append(nameinfo[nameid].renming+'<br>');
                                 $('#trihoilday').append('('+tri.duration+') ');
                                 $('#trihoilday').append(time.getMonth()+1+'月'+time.getDate()+'日'+' ');
                                 $('#trihoilday').append(tri.stime+'-'+tri.etime+';<br>');
