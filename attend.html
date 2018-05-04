@@ -33,7 +33,9 @@ function echo(display){
 
     </table>
 </div>
-<div class="table" id="statistic">
+<p>三倍工资假日统计：</p>
+<div id="trihoilday">
+    
     
 </div>
 
@@ -62,6 +64,7 @@ $(document).ready(function(){
     var dutyx_num=[];//["duty_X":num,...]数组,用来供班次查询
 
     $("#datepicker").change(function(){
+        $("#trihoilday").empty();
         var dpget = $("#datepicker").val();
         sdtime = new Date(mStartDate(dpget));
         edtime = new Date(mEndDate(dpget));
@@ -69,10 +72,11 @@ $(document).ready(function(){
         UTCedtimestamp=edtime.getTime();
         sdtimeNum = (UTCsdtimestamp-28800000)/100000;//获得开始和结束时间的时间戳,转换为timeNum作为时间标识,每个之间相差864
         edtimeNum = (UTCedtimestamp-28800000)/100000;
-        //console.log(sdtimeNum);console.log(edtimeNum);
+        console.log(sdtimeNum);console.log(edtimeNum);
         timeNumLoop=timeNumArrayCreate(sdtimeNum,edtimeNum);
+        sdtimeNum_m1=sdtimeNum-864;
 
-        $.getJSON('getrotainfo.php', {'sdtimeNum': sdtimeNum, 'edtimeNum': edtimeNum}, function(data) {
+        $.getJSON('getrotainfo.php', {'sdtimeNum': sdtimeNum_m1, 'edtimeNum': edtimeNum}, function(data) {
             $("#attend-tab").empty();
             getinfo=data;
             console.log(getinfo);
@@ -84,24 +88,29 @@ $(document).ready(function(){
             for(monthnum=0;monthnum<timeNumLoop.length;monthnum++){
                 timeNum=timeNumLoop[monthnum];
                 time=new Date(timeNum*100000);
-                var daytype;
-                if(isHoilday(timeNum,dayinfo)){
-                    daytype='weekend';
-                }
-                else{
-                    daytype='weekday';
-                }
                 $("#attend-tab-date").append('<td><div>'
                     + weekdayZH[time.getDay()]
-                    +'</div><div class="date-'
-                    + daytype
+                    +'</div><div id="attend_date_'
+                    + monthnum
                     +'">'+time.getDate() 
                     +'</div></td>');
+                var daytype;
+                if(isHoilday(timeNum,dayinfo)){
+                    $('#attend_date_' + monthnum).addClass("date-weekend");
+                }
+                else{
+                    $('#attend_date_' + monthnum).addClass("date-weekday");
+                }
+                if(isHoilday(timeNum,dayinfo)==1){
+                    $('#attend_date_' + monthnum).addClass("hoilday");
+                }
+                
             }
 
             Object.keys(nameinfo).forEach(function(nameid){//根据人名数确定列数
                 $("#attend-tab").append('<tr id=attend-tab-name_'+nameid+'></tr>');
                 $('#attend-tab-name_'+nameid).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
+                $('#trihoilday').append(nameinfo[nameid].renming+'<br>');
                 for(monthnum=0;monthnum<timeNumLoop.length;monthnum++){
                     timeNum=timeNumLoop[monthnum];
                     var eachtimenuminfo=[];
@@ -110,12 +119,22 @@ $(document).ready(function(){
                     for (x in eachtimenuminfo){//遍历每个内容数组
                         var rotaid=eachtimenuminfo[x];
                         if(rotaid==nameid){
-                            cont+=dutyxToDuty(x,timeNum,dutyinfo)+'<br>';
+                            cont+=dutyxToDuty(x,timeNum,dutyinfo).name+'<br>';
                             //cont+=dutyxToSimpleDuty(x,timeNum,dutyinfo)+'<br>';
+
+                            tri=dutyxToDuty(x,timeNum,dutyinfo);
+                            if(tri!='' && isHoilday(timeNum,dayinfo)==1){
+                                $('#trihoilday').append('('+tri.duration+') ');
+                                $('#trihoilday').append(time.getMonth()+1+'月'+time.getDate()+'日'+' ');
+                                $('#trihoilday').append(tri.stime+'-'+tri.etime+';<br>');
+                            }
                         }
                     }
                     $('#attend-tab-name_'+nameid).append('<td class="content" id=attend-tab-name_' + nameid + '-' + timeNum +'>' + cont + '</td>');
+
+                    
                 }
+                $('#trihoilday').append('<br>');
             });
         });
         

@@ -12,22 +12,20 @@ class rotaInfoGet {
     function dutyInfoNeed(){
         global $db;
         $dutyinfo=array();
-        $i=0;
         foreach ($db->query("SELECT * from rota_bochuke_dutyinfo 
                             where (stimenum<=$this->s_timenum and etimenum>=$this->s_timenum) 
                             or (stimenum<=$this->e_timenum and etimenum>=$this->e_timenum)") as $arr) {
-            $dutyinfo[$i]["stimenum"]=$arr['stimenum'];
-            $dutyinfo[$i]["etimenum"]=$arr['etimenum'];
-            $dutyinfo[$i]["name"]=$arr['name'];
-            $dutyinfo[$i]["dutyx"]=$arr['dutyx'];
-            $dutyinfo[$i]["num"]=$arr['num'];
-            $dutyinfo[$i]["stime"]=$arr['stime'];
-            $dutyinfo[$i]["etime"]=$arr['etime'];
-            $dutyinfo[$i]["score"]=$arr['score'];
-            $dutyinfo[$i]["duration"]=$arr['duration'];
-            $dutyinfo[$i]["coefficient"]=$arr['coefficient'];
-            $dutyinfo[$i]["weekday"]=$arr['weekday'];
-            $i++;
+            $duty_x=$arr['dutyx'];              
+            $dutyinfo[$duty_x]["stimenum"]=$arr['stimenum'];
+            $dutyinfo[$duty_x]["etimenum"]=$arr['etimenum'];
+            $dutyinfo[$duty_x]["name"]=$arr['name'];
+            $dutyinfo[$duty_x]["num"]=$arr['num'];
+            $dutyinfo[$duty_x]["stime"]=$arr['stime'];
+            $dutyinfo[$duty_x]["etime"]=$arr['etime'];
+            $dutyinfo[$duty_x]["score"]=$arr['score'];
+            $dutyinfo[$duty_x]["duration"]=$arr['duration'];
+            $dutyinfo[$duty_x]["coefficient"]=$arr['coefficient'];
+            $dutyinfo[$duty_x]["weekday"]=$arr['weekday'];
         }
         return $dutyinfo;
     }

@@ -63,7 +63,7 @@ function Names($dateidstart){
     $names=array();
     foreach ($db->query('SELECT * FROM rota_bochuke_nameinfo') as $row) {
         if($row['retirement']=="" or dateidcreate($row['retirement'])>=$dateidstart){//如果退休日期大于dateid
-            array_push($names,$row['name_x']);
+            //array_push($names,$row['name_x']);
         }
     }
     return $names;

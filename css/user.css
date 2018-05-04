@@ -27,3 +27,7 @@ td{
   .date-weekday{
       font-family:"Times New Roman", Times, sans-serif;
   }
+
+  .hoilday {
+    background-color: red;
+}

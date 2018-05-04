@@ -92,9 +92,9 @@ $("#datepicker").change(function(){
         dutyinfo=getinfo.dutyinfo;
         rotainfo=getinfo.rotainfo;
         console.log(getinfo);
-        Object.keys(dutyinfo).forEach(function(dutyinfo_index){
-            if(dutyinfo[dutyinfo_index]['num']!=''){
-                dutyx_num[dutyinfo[dutyinfo_index]['dutyx']]=dutyinfo[dutyinfo_index]['num'];
+        Object.keys(dutyinfo).forEach(function(dutyx){
+            if(dutyinfo[dutyx]['num']!=''){
+                dutyx_num[dutyx]=dutyinfo[dutyx]['num'];
             }
         });
         //console.log(dutyx_num);
@@ -103,8 +103,11 @@ $("#datepicker").change(function(){
             time=new Date(timeNum*100000);
             $('#date_' + weeknum).append(time.getMonth()+1+'月'+time.getDate()+'日');
             $('#week_' + weeknum).append('星期'+weekdayZH[time.getDay()]);
-            if(isHoilday(timeNum,dayinfo)){
-                //$('#date_' + dateid).addClass("hoilday");
+            if(isHoilday(timeNum,dayinfo)==1){
+                $('#date_' + weeknum).addClass("hoilday");
+                $('#week_' + weeknum).addClass("hoilday");
+            }
+            if(isHoilday(timeNum,dayinfo)==2){
                 $('#week_' + weeknum).addClass("hoilday");
             }
             Object.keys(rotainfo[timeNum]).forEach(function(duty_x){

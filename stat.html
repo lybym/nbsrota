@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>排班统计</title>
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
+    <link rel="stylesheet" href="css/stat.css?v=1">
+ 
+    <script src="libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="libs/jqueryui/datepicker-zh-CN.js"></script>
+    <script src="libs/mathjs/4.2.1/math.js"></script>
+
+    <script src="libs/funclibs.js?v=1"></script>
+    <style>
+            
+    </style>
+
+<script>
+function echo(display){
+    var x = document.getElementById("echo");
+	x.innerHTML=display;
+}
+
+</script>
+</head>
+
+<body>
+<div id=echo></div>
+<p>请选择需要查询的日期：<input type="text" id="datepicker"></p>
+
+
+<table id="stat">
+
+</table>
+
+
+
+<script>
+$("#datepicker").datepicker({
+    changeMonth: true,
+    changeYear: true,
+    minDate: new Date(2014,12-1,29), //起始从2015年1月1日开始
+    maxDate: "+2Y" //多显示之后2年
+});
+
+var dpget;
+var sdtimeNum;//将时间戳转换为timeNum作为时间标识,每个之间相差864
+var edtimeNum;
+var timeNumLoop=[];//timeNum的循环数组，用来遍历
+var getinfo;
+var dayinfo;
+var nameinfo;
+var dutyinfo;
+var rotainfo;
+var name_source=[];//["人名",...]数组
+var renming_nameid=[];//["人名":nameid,...]数组,用来供构建update json查询
+var dutyx_num=[];//["duty_X":num,...]数组,用来供班次查询
+var stat=["补时","加分","假日","早班数","中班数","晚班数","总班数","工作量","量化分"];
+
+$("#datepicker").change(function(){
+    var dpget = $("#datepicker").val();
+    sdtime = new Date(mStartDate(dpget));
+    edtime = new Date(mEndDate(dpget));
+    UTCsdtimestamp=sdtime.getTime();//此处获得的时间戳为UTC时间，比北京时间多8H，即28800秒，28800000毫秒
+    UTCedtimestamp=edtime.getTime();
+    sdtimeNum = (UTCsdtimestamp-28800000)/100000;//获得开始和结束时间的时间戳,转换为timeNum作为时间标识,每个之间相差864
+    edtimeNum = (UTCedtimestamp-28800000)/100000;
+    //console.log(sdtimeNum);console.log(edtimeNum);
+    timeNumLoop=timeNumArrayCreate(sdtimeNum,edtimeNum);
+    sdtimeNum_m1=sdtimeNum-864;
+
+    $.getJSON('getrotainfo.php', {'sdtimeNum': sdtimeNum_m1, 'edtimeNum': edtimeNum}, function(data) {
+        $("#stat").empty();
+        getinfo=data;
+        console.log(getinfo);
+        dayinfo=getinfo.dayinfo;
+        nameinfo=getinfo.nameinfo;
+        dutyinfo=getinfo.dutyinfo;
+        rotainfo=getinfo.rotainfo;
+        $("#stat").append('<tr id="stat_th"><td class="title">姓名</td></tr>');//第一行第一列
+        Object.keys(nameinfo).forEach(function(nameid){//第一列
+            $("#stat").append('<tr id=stat_name'+nameid+'></tr>');
+            $('#stat_name'+nameid).append('<td class="title">'+ nameinfo[nameid].renming +'</td>');
+        });
+        $("#stat").append('<tr id=stat_sum></tr>');//最后一行
+        $('#stat_sum').append('<td class="title">总计</td>');//最后一行第一列
+        Object.keys(dutyinfo).forEach(function(dutyx){//
+            $("#stat_th").append('<td class="title">'+ dutyinfo[dutyx].name +'</td>');
+        });
+        for (statnum in stat){
+            $('#stat_th').append('<td class="title">' + stat[statnum] + '</td>');
+        }
+
+        Object.keys(nameinfo).forEach(function(nameid){
+            var statobj=dutyStat(nameid,dayinfo,dutyinfo,timeNumLoop,rotainfo);
+            //console.log(statobj);
+            Object.keys(dutyinfo).forEach(function(dutyx){//
+                $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_' + dutyx + '">' + dutySum(nameid,dutyx,timeNumLoop,rotainfo) + '</td>');
+            });
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_BS">' + statobj.BS + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_JF">' + statobj.JF + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_JR">' + statobj.JR + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_zao">' + statobj.zao + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_zhong">' + statobj.zhong + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_wan">' + statobj.wan + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_sum">' + statobj.sum + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_time">' + statobj.time + '</td>');
+            $('#stat_name'+nameid).append('<td class="cont" id="stat_name' + nameid + '_stat_score">' + statobj.score + '</td>');
+        });
+        
+
+        Object.keys(dutyinfo).forEach(function(dutyx){
+            var dutysum=0;
+            Object.keys(nameinfo).forEach(function(nameid){//
+                var duty=$('#stat_name' + nameid + '_' + dutyx).text();
+                if(duty!=''){
+                    dutysum+=parseInt(duty);
+                }
+            });
+            if(dutysum==0){
+                dutysum='';
+            }
+            $('#stat_sum').append('<td class="cont" id="stat_sum_' + dutyx + '">' + dutysum + '</td>');
+        });
+
+        for (statnum in stat){
+            $('#stat_sum').append('<td class="cont" id="stat_sum_stat' + statnum + '"></td>');
+        }
+
+
+    });
+});
+ 
+
+
+</script>
+</body>
+</html>
